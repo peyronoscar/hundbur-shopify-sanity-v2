@@ -4256,7 +4256,7 @@
         },
         "optional": true
       },
-      "lenght": {
+      "length": {
         "type": "objectAttribute",
         "value": {
           "type": "number"

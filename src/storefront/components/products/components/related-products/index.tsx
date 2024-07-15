@@ -1,33 +1,23 @@
 import { ProductWithCategoryNotes } from "@/sanity/types/product";
 import ProductPreview from "../product-preview";
-import {
-  getCategoriesByPath,
-  getProductRecommendations,
-  getProducts,
-} from "@/sanity/lib";
+import { getCategoriesByPath, getProductRecommendations } from "@/sanity/lib";
 
 type RelatedProductsProps = {
   product: ProductWithCategoryNotes;
-  categoryHandle: string[];
 };
 
 export default async function RelatedProducts({
   product,
-  categoryHandle,
 }: RelatedProductsProps) {
-  const categories = await getCategoriesByPath({ slugs: categoryHandle });
-
-  if (!categories) {
-    return null;
-  }
-
-  const category = categories[categories.length - 1];
-
-  if (!category || !product.store?.gid) {
+  if (!product.store?.gid) {
     return null;
   }
 
   const relatedProducts = await getProductRecommendations(product.store?.gid);
+
+  if (relatedProducts.length === 0) {
+    return null;
+  }
 
   return (
     <div className="product-page-constraint">

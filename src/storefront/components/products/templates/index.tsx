@@ -42,16 +42,11 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
           <CategoryInfo product={product} categoryHandle={categoryHandle} />
         </div>
       ) : null}
-      {categoryHandle ? (
-        <div className="my-16 content-container small:my-32">
-          <Suspense fallback={<SkeletonRelatedProducts />}>
-            <RelatedProducts
-              product={product}
-              categoryHandle={categoryHandle}
-            />
-          </Suspense>
-        </div>
-      ) : null}
+      <div className="my-16 content-container small:my-32">
+        <Suspense fallback={<SkeletonRelatedProducts />}>
+          <RelatedProducts product={product} />
+        </Suspense>
+      </div>
     </>
   );
 };

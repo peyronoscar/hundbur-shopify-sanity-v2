@@ -1,4 +1,4 @@
-import { getProduct, getProducts } from "@/sanity/lib";
+import { getProduct } from "@/sanity/lib";
 import ProductTemplate from "@/storefront/components/products/templates";
 import { getProduct as getShopifyProduct } from "@/storefront/lib/shopify";
 import { Metadata } from "next";

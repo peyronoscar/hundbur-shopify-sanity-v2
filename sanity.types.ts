@@ -678,7 +678,7 @@ export type Product = {
   weight?: number;
   height?: number;
   width?: number;
-  lenght?: number;
+  length?: number;
 };
 
 export type Category = {
@@ -1525,7 +1525,7 @@ export type CategoryProductsQueryResult = Array<{
   weight?: number;
   height?: number;
   width?: number;
-  lenght?: number;
+  length?: number;
 }>;
 // Variable: categoryPathQuery
 // Query: *[_type == "category" && _id == $id][0]{ path }
@@ -1612,7 +1612,7 @@ export type ProductByHandleQueryResult = {
   weight?: number;
   height?: number;
   width?: number;
-  lenght?: number;
+  length?: number;
 } | null;
 // Variable: productTypesQuery
 // Query: array::unique(*[_type == "product"].store.productType)
@@ -1668,7 +1668,7 @@ export type ProductsQueryTemplateResult = Array<{
   weight?: number;
   height?: number;
   width?: number;
-  lenght?: number;
+  length?: number;
 }>;
 // Variable: productsByIdsQuery
 // Query: *[_type == "product" && _id in $ids]
@@ -1718,5 +1718,5 @@ export type ProductsByIdsQueryResult = Array<{
   weight?: number;
   height?: number;
   width?: number;
-  lenght?: number;
+  length?: number;
 }>;
