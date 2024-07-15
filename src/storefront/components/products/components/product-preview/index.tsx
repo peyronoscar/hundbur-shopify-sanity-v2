@@ -1,6 +1,5 @@
 import { Text } from "@medusajs/ui";
 
-import LocalizedClientLink from "@/storefront/components/common/components/localized-client-link";
 import Thumbnail from "../thumbnail";
 import PreviewPrice from "./price";
 import { Product } from "@/sanity.types";
@@ -10,9 +9,11 @@ import { getProduct } from "@/storefront/lib/shopify";
 export default async function ProductPreview({
   productPreview,
   isFeatured,
+  categoryHandle,
 }: {
   productPreview: Omit<Product, "sales">;
   isFeatured?: boolean;
+  categoryHandle?: string[];
 }) {
   if (!productPreview.store?.slug?.current) {
     return null;
@@ -28,7 +29,11 @@ export default async function ProductPreview({
 
   return (
     <Link
-      href={`/products/${productPreview.store.slug.current}`}
+      href={
+        categoryHandle
+          ? `/products/${categoryHandle.join("/")}/${productPreview.store.slug.current}`
+          : `/products/${productPreview.store.slug.current}`
+      }
       className="group"
     >
       <div>

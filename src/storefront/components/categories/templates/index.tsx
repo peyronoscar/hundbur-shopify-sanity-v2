@@ -111,6 +111,7 @@ export default function CategoryTemplate({
             page={pageNumber}
             categoryId={category._id}
             typeId={typeId}
+            categoryHandle={categoryHandle}
           />
         </Suspense>
       </div>

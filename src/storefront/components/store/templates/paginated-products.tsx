@@ -23,6 +23,7 @@ export default async function PaginatedProducts({
   vendorId,
   typeId,
   productsIds,
+  categoryHandle,
 }: {
   order?: SortOptions;
   page: number;
@@ -31,6 +32,7 @@ export default async function PaginatedProducts({
   vendorId?: string;
   typeId?: string;
   productsIds?: string[];
+  categoryHandle?: string[];
 }) {
   const queryParams: PaginatedProductsParams = {
     limit: PRODUCT_LIMIT,
@@ -71,7 +73,10 @@ export default async function PaginatedProducts({
         {products.map((p) => {
           return (
             <li key={p._id}>
-              <ProductPreview productPreview={p} />
+              <ProductPreview
+                productPreview={p}
+                categoryHandle={categoryHandle}
+              />
             </li>
           );
         })}
