@@ -2,7 +2,7 @@ import { Text } from "@medusajs/ui";
 
 import Thumbnail from "../thumbnail";
 import PreviewPrice from "./price";
-import { Product } from "@/sanity.types";
+import { Product, ShopifyProduct } from "@/sanity.types";
 import Link from "next/link";
 import { getProduct } from "@/storefront/lib/shopify";
 
@@ -11,7 +11,7 @@ export default async function ProductPreview({
   isFeatured,
   categoryHandle,
 }: {
-  productPreview: Omit<Product, "sales">;
+  productPreview: { _id: string; store: ShopifyProduct | null };
   isFeatured?: boolean;
   categoryHandle?: string[];
 }) {

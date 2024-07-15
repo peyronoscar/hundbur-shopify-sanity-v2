@@ -37,7 +37,7 @@ const ProductInfo = ({ product, categoryHandle }: ProductInfoProps) => {
           >
             <AccordionItem value={categoryNote.value}>
               <AccordionTrigger className="text-left">
-                {categoryNote.value}
+                {categoryNote.category?.title}
               </AccordionTrigger>
               <AccordionContent>{categoryNote.value}</AccordionContent>
             </AccordionItem>

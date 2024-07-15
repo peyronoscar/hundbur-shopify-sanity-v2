@@ -1621,102 +1621,14 @@ export type ProductTypesQueryResult = unknown;
 // Query: array::unique(*[_type == "product"].store.vendor)
 export type ProductVendorsQueryResult = unknown;
 // Variable: productsQueryTemplate
-// Query: *[_type == "product" && store.status == "active"]{  ...,  "sales": null}
+// Query: *[_type == "product" && store.status == "active"]{  _id,  store}
 export type ProductsQueryTemplateResult = Array<{
   _id: string;
-  _type: "product";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  hidden?: string;
-  titleProxy?: ProxyString;
-  slugProxy?: ProxyString;
-  colorTheme?: {
-    _ref: string;
-    _type: "reference";
-    _weak?: boolean;
-    [internalGroqTypeReferenceTo]?: "colorTheme";
-  };
-  body?: PortableText;
-  store?: ShopifyProduct;
-  seo?: Seo;
-  categories?: Array<{
-    _ref: string;
-    _type: "reference";
-    _weak?: boolean;
-    _key: string;
-    [internalGroqTypeReferenceTo]?: "category";
-  }>;
-  categoryPath?: Array<{
-    _ref: string;
-    _type: "reference";
-    _weak?: boolean;
-    _key: string;
-    [internalGroqTypeReferenceTo]?: "category";
-  }>;
-  categoryNotes?: Array<{
-    category?: {
-      _ref: string;
-      _type: "reference";
-      _weak?: boolean;
-      [internalGroqTypeReferenceTo]?: "category";
-    };
-    value?: string;
-    _key: string;
-  }>;
-  sales: null;
-  weight?: number;
-  height?: number;
-  width?: number;
-  length?: number;
+  store: ShopifyProduct | null;
 }>;
 // Variable: productsByIdsQuery
-// Query: *[_type == "product" && _id in $ids]
+// Query: *[_type == "product" && _id in $ids]{  _id,  store}
 export type ProductsByIdsQueryResult = Array<{
   _id: string;
-  _type: "product";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  hidden?: string;
-  titleProxy?: ProxyString;
-  slugProxy?: ProxyString;
-  colorTheme?: {
-    _ref: string;
-    _type: "reference";
-    _weak?: boolean;
-    [internalGroqTypeReferenceTo]?: "colorTheme";
-  };
-  body?: PortableText;
-  store?: ShopifyProduct;
-  seo?: Seo;
-  categories?: Array<{
-    _ref: string;
-    _type: "reference";
-    _weak?: boolean;
-    _key: string;
-    [internalGroqTypeReferenceTo]?: "category";
-  }>;
-  categoryPath?: Array<{
-    _ref: string;
-    _type: "reference";
-    _weak?: boolean;
-    _key: string;
-    [internalGroqTypeReferenceTo]?: "category";
-  }>;
-  categoryNotes?: Array<{
-    category?: {
-      _ref: string;
-      _type: "reference";
-      _weak?: boolean;
-      [internalGroqTypeReferenceTo]?: "category";
-    };
-    value?: string;
-    _key: string;
-  }>;
-  sales?: number;
-  weight?: number;
-  height?: number;
-  width?: number;
-  length?: number;
+  store: ShopifyProduct | null;
 }>;
