@@ -1,103 +1,44 @@
-import type { Metadata } from "next";
+import { getProduct, getProducts } from "@/sanity/lib";
+import ProductTemplate from "@/storefront/components/products/templates";
+import { getProduct as getShopifyProduct } from "@/storefront/lib/shopify";
+import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { HIDDEN_PRODUCT_TAG } from "@/storefront/lib/constants";
-import { getProduct } from "@/storefront/lib/shopify";
-import { ProductMain } from "@/storefront/components/product";
-import { getProduct as getSanityProduct } from "@/sanity/lib";
-
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/storefront/components/ui/collapsible";
-
-export async function generateMetadata({
-  params,
-}: {
+type Props = {
   params: { handle: string };
-}): Promise<Metadata> {
-  const product = await getProduct(params.handle);
+};
 
-  if (!product) return notFound();
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { handle } = params;
 
-  const { url, width, height, altText: alt } = product.featuredImage || {};
-  const indexable = !product.tags.includes(HIDDEN_PRODUCT_TAG);
+  const product = await getProduct(handle);
+
+  if (!product || !product.store) {
+    notFound();
+  }
+
+  const { title, descriptionHtml, previewImageUrl } = product.store;
 
   return {
-    title: product.seo.title || product.title,
-    description: product.seo.description || product.description,
-    robots: {
-      index: indexable,
-      follow: indexable,
-      googleBot: {
-        index: indexable,
-        follow: indexable,
-      },
+    title: title,
+    description: descriptionHtml,
+    openGraph: {
+      title: title,
+      description: descriptionHtml,
+      images: previewImageUrl ? [previewImageUrl] : [],
     },
-    openGraph: url
-      ? {
-          images: [
-            {
-              url,
-              width,
-              height,
-              alt,
-            },
-          ],
-        }
-      : null,
   };
 }
 
-export default async function ProductPage({
-  params,
-}: {
-  params: { handle: string };
-}) {
-  const product = await getProduct(params.handle);
-  const sanityProduct = await getSanityProduct(params.handle);
+export default async function ProductPage({ params }: Props) {
+  const [product, shopifyProduct] = await Promise.all([
+    getProduct(params.handle),
+    getShopifyProduct(params.handle),
+  ]);
 
-  if (!product) return notFound();
+  if (!product || !shopifyProduct) {
+    notFound();
+  }
 
-  const productJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Product",
-    name: product.title,
-    description: product.description,
-    image: product.featuredImage.url,
-    offers: {
-      "@type": "AggregateOffer",
-      availability: product.availableForSale
-        ? "https://schema.org/InStock"
-        : "https://schema.org/OutOfStock",
-      priceCurrency: product.priceRange.minVariantPrice.currencyCode,
-      highPrice: product.priceRange.maxVariantPrice.amount,
-      lowPrice: product.priceRange.minVariantPrice.amount,
-    },
-  };
-
-  return (
-    <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(productJsonLd),
-        }}
-      />
-      <ProductMain product={product} />
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {sanityProduct?.categoryNotes?.map((note, i) => {
-          if (!note.category) return null;
-
-          return (
-            <Collapsible key={i}>
-              <CollapsibleTrigger>{note.category.title}</CollapsibleTrigger>
-              <CollapsibleContent>{note.value}</CollapsibleContent>
-            </Collapsible>
-          );
-        })}
-      </div>
-    </>
-  );
+  return <ProductTemplate product={product} shopifyProduct={shopifyProduct} />;
 }

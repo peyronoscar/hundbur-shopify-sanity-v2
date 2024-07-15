@@ -1,0 +1,121 @@
+"use client";
+
+import { Table, Text, clx } from "@medusajs/ui";
+
+import CartItemSelect from "@/storefront/components/cart/components/cart-item-select";
+import DeleteButton from "@/storefront/components/common/components/delete-button";
+import LineItemOptions from "@/storefront/components/common/components/line-item-options";
+import LineItemPrice from "@/storefront/components/common/components/line-item-price";
+import LineItemUnitPrice from "@/storefront/components/common/components/line-item-unit-price";
+import Thumbnail from "@/storefront/components/products/components/thumbnail";
+import Spinner from "@/storefront/components/common/icons/spinner";
+import { useState } from "react";
+import LocalizedClientLink from "@/storefront/components/common/components/localized-client-link";
+import { CartItem } from "@/storefront/lib/shopify/types";
+import ErrorMessage from "@/storefront/components/common/components/error-message";
+import { updateItemQuantity } from "@/storefront/actions/cart";
+
+type ItemProps = {
+  item: CartItem;
+  type?: "full" | "preview";
+};
+
+const Item = ({ item, type = "full" }: ItemProps) => {
+  const [updating, setUpdating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const { handle } = item.merchandise.product;
+
+  const changeQuantity = async (quantity: number) => {
+    setError(null);
+    setUpdating(true);
+
+    const message = await updateItemQuantity({
+      lineId: item.id,
+      variantId: item.merchandise.id,
+      quantity,
+    })
+      .catch((err) => {
+        setError("Något gick fel, försök igen senare.");
+      })
+      .finally(() => {
+        setUpdating(false);
+      });
+  };
+
+  return (
+    <Table.Row className="w-full">
+      <Table.Cell className="!pl-0 p-4 w-24">
+        <LocalizedClientLink
+          href={`/products/${handle}`}
+          className={clx("flex", {
+            "w-16": type === "preview",
+            "small:w-24 w-12": type === "full",
+          })}
+        >
+          <Thumbnail
+            thumbnail={item.merchandise.product.featuredImage?.url}
+            size="square"
+          />
+        </LocalizedClientLink>
+      </Table.Cell>
+
+      <Table.Cell className="text-left">
+        <Text className="txt-medium-plus text-ui-fg-base">
+          {item.merchandise.product.title}
+        </Text>
+        <LineItemOptions item={item} />
+      </Table.Cell>
+
+      {type === "full" && (
+        <Table.Cell>
+          <div className="flex gap-2 items-center w-28">
+            <DeleteButton id={item.id} />
+            <CartItemSelect
+              value={item.quantity}
+              onChange={(value) => changeQuantity(parseInt(value.target.value))}
+              className="w-14 h-10 p-4"
+            >
+              {Array.from(
+                {
+                  length: 10,
+                },
+                (_, i) => (
+                  <option value={i + 1} key={i}>
+                    {i + 1}
+                  </option>
+                )
+              )}
+            </CartItemSelect>
+            {updating && <Spinner />}
+          </div>
+          <ErrorMessage error={error} />
+        </Table.Cell>
+      )}
+
+      {type === "full" && (
+        <Table.Cell className="hidden small:table-cell">
+          <LineItemUnitPrice item={item} style="tight" />
+        </Table.Cell>
+      )}
+
+      <Table.Cell className="!pr-0">
+        <span
+          className={clx("!pr-0", {
+            "flex flex-col items-end h-full justify-center": type === "preview",
+          })}
+        >
+          {type === "preview" && (
+            <span className="flex gap-x-1 ">
+              <Text className="text-muted-foreground">{item.quantity}x </Text>
+              <LineItemUnitPrice item={item} style="tight" />
+            </span>
+          )}
+          <LineItemPrice item={item} />
+        </span>
+      </Table.Cell>
+    </Table.Row>
+  );
+};
+
+export default Item;

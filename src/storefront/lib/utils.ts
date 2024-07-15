@@ -45,3 +45,11 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+export function constructSuspensKey(searchParams: {
+  [key: string]: string | string[] | undefined;
+}) {
+  return Object.entries(searchParams)
+    .map(([key, value]) => `${key}=${value}`)
+    .join("-");
+}

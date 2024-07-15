@@ -675,6 +675,10 @@ export type Product = {
     _key: string;
   }>;
   sales?: number;
+  weight?: number;
+  height?: number;
+  width?: number;
+  lenght?: number;
 };
 
 export type Category = {
@@ -1354,6 +1358,77 @@ export type CategoriesQueryResult = Array<{
   }>;
   product_count: number;
 }>;
+// Variable: categoryTreeQuery
+// Query: *[_type == "category" && !defined(parent)]{    ...,    "product_count": count(*[_type=="product" && references(^._id)]),    "category_children": *[_type=="category" && parent._ref == ^._id]{      ...,      "product_count": count(*[_type=="product" && references(^._id)]),      "category_children": *[_type=="category" && parent._ref == ^._id]{        ...,        "product_count": count(*[_type=="product" && references(^._id)])      }    }}
+export type CategoryTreeQueryResult = Array<{
+  _id: string;
+  _type: "category";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title?: string;
+  slug?: Slug;
+  parent?: {
+    _ref: string;
+    _type: "reference";
+    _weak?: boolean;
+    [internalGroqTypeReferenceTo]?: "category";
+  };
+  path?: Array<{
+    _ref: string;
+    _type: "reference";
+    _weak?: boolean;
+    _key: string;
+    [internalGroqTypeReferenceTo]?: "category";
+  }>;
+  product_count: number;
+  category_children: Array<{
+    _id: string;
+    _type: "category";
+    _createdAt: string;
+    _updatedAt: string;
+    _rev: string;
+    title?: string;
+    slug?: Slug;
+    parent?: {
+      _ref: string;
+      _type: "reference";
+      _weak?: boolean;
+      [internalGroqTypeReferenceTo]?: "category";
+    };
+    path?: Array<{
+      _ref: string;
+      _type: "reference";
+      _weak?: boolean;
+      _key: string;
+      [internalGroqTypeReferenceTo]?: "category";
+    }>;
+    product_count: number;
+    category_children: Array<{
+      _id: string;
+      _type: "category";
+      _createdAt: string;
+      _updatedAt: string;
+      _rev: string;
+      title?: string;
+      slug?: Slug;
+      parent?: {
+        _ref: string;
+        _type: "reference";
+        _weak?: boolean;
+        [internalGroqTypeReferenceTo]?: "category";
+      };
+      path?: Array<{
+        _ref: string;
+        _type: "reference";
+        _weak?: boolean;
+        _key: string;
+        [internalGroqTypeReferenceTo]?: "category";
+      }>;
+      product_count: number;
+    }>;
+  }>;
+}>;
 // Variable: categoriesByPathQuery
 // Query: *[_type == "category" && slug.current in $slugs]{    ...,    "product_count": count(*[_type == "product" && references(^._id)]),    "category_children": *[_type=="category" && parent._ref == ^._id]{      ...,      "product_count": count(*[_type == "product" && references(^._id)])    }}
 export type CategoriesByPathQueryResult = Array<{
@@ -1447,6 +1522,10 @@ export type CategoryProductsQueryResult = Array<{
     _key: string;
   }>;
   sales: null;
+  weight?: number;
+  height?: number;
+  width?: number;
+  lenght?: number;
 }>;
 // Variable: categoryPathQuery
 // Query: *[_type == "category" && _id == $id][0]{ path }
@@ -1459,6 +1538,17 @@ export type CategoryPathQueryResult = {
     [internalGroqTypeReferenceTo]?: "category";
   }> | null;
 } | null;
+// Variable: categoriesPathQuery
+// Query: *[_type == "category" && _id in $id]{ path }
+export type CategoriesPathQueryResult = Array<{
+  path: Array<{
+    _ref: string;
+    _type: "reference";
+    _weak?: boolean;
+    _key: string;
+    [internalGroqTypeReferenceTo]?: "category";
+  }> | null;
+}>;
 // Variable: productByHandleQuery
 // Query: *[_type == "product" && store.slug.current == $slug][0]{  ...,  categoryNotes[]{    ...,    category->  }}
 export type ProductByHandleQueryResult = {
@@ -1519,10 +1609,114 @@ export type ProductByHandleQueryResult = {
     value?: string;
   }> | null;
   sales?: number;
+  weight?: number;
+  height?: number;
+  width?: number;
+  lenght?: number;
 } | null;
-// Source: ./src/app/(blog)/blog/posts/[slug]/page.tsx
-// Variable: postSlugs
-// Query: *[_type == "post"]{slug}
-export type PostSlugsResult = Array<{
-  slug: Slug | null;
+// Variable: productTypesQuery
+// Query: array::unique(*[_type == "product"].store.productType)
+export type ProductTypesQueryResult = unknown;
+// Variable: productVendorsQuery
+// Query: array::unique(*[_type == "product"].store.vendor)
+export type ProductVendorsQueryResult = unknown;
+// Variable: productsQueryTemplate
+// Query: *[_type == "product" && store.status == "active"]{  ...,  "sales": null}
+export type ProductsQueryTemplateResult = Array<{
+  _id: string;
+  _type: "product";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  hidden?: string;
+  titleProxy?: ProxyString;
+  slugProxy?: ProxyString;
+  colorTheme?: {
+    _ref: string;
+    _type: "reference";
+    _weak?: boolean;
+    [internalGroqTypeReferenceTo]?: "colorTheme";
+  };
+  body?: PortableText;
+  store?: ShopifyProduct;
+  seo?: Seo;
+  categories?: Array<{
+    _ref: string;
+    _type: "reference";
+    _weak?: boolean;
+    _key: string;
+    [internalGroqTypeReferenceTo]?: "category";
+  }>;
+  categoryPath?: Array<{
+    _ref: string;
+    _type: "reference";
+    _weak?: boolean;
+    _key: string;
+    [internalGroqTypeReferenceTo]?: "category";
+  }>;
+  categoryNotes?: Array<{
+    category?: {
+      _ref: string;
+      _type: "reference";
+      _weak?: boolean;
+      [internalGroqTypeReferenceTo]?: "category";
+    };
+    value?: string;
+    _key: string;
+  }>;
+  sales: null;
+  weight?: number;
+  height?: number;
+  width?: number;
+  lenght?: number;
+}>;
+// Variable: productsByIdsQuery
+// Query: *[_type == "product" && _id in $ids]
+export type ProductsByIdsQueryResult = Array<{
+  _id: string;
+  _type: "product";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  hidden?: string;
+  titleProxy?: ProxyString;
+  slugProxy?: ProxyString;
+  colorTheme?: {
+    _ref: string;
+    _type: "reference";
+    _weak?: boolean;
+    [internalGroqTypeReferenceTo]?: "colorTheme";
+  };
+  body?: PortableText;
+  store?: ShopifyProduct;
+  seo?: Seo;
+  categories?: Array<{
+    _ref: string;
+    _type: "reference";
+    _weak?: boolean;
+    _key: string;
+    [internalGroqTypeReferenceTo]?: "category";
+  }>;
+  categoryPath?: Array<{
+    _ref: string;
+    _type: "reference";
+    _weak?: boolean;
+    _key: string;
+    [internalGroqTypeReferenceTo]?: "category";
+  }>;
+  categoryNotes?: Array<{
+    category?: {
+      _ref: string;
+      _type: "reference";
+      _weak?: boolean;
+      [internalGroqTypeReferenceTo]?: "category";
+    };
+    value?: string;
+    _key: string;
+  }>;
+  sales?: number;
+  weight?: number;
+  height?: number;
+  width?: number;
+  lenght?: number;
 }>;

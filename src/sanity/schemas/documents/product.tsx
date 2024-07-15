@@ -71,6 +71,7 @@ export const product = defineType({
       name: "categoryPath",
       title: "Path",
       type: "array",
+      hidden: true,
       of: [{ type: "reference", to: [{ type: "category" }] }],
       description:
         "This array contains references to all parent categories, maintaining order from the root.",
@@ -98,6 +99,31 @@ export const product = defineType({
       name: "sales",
       title: "Sales",
       type: "number",
+      group: "editorial",
+    }),
+    defineField({
+      name: "weight",
+      title: "Weight",
+      type: "number",
+      group: "editorial",
+    }),
+    defineField({
+      name: "height",
+      title: "Height",
+      type: "number",
+      group: "editorial",
+    }),
+    defineField({
+      name: "width",
+      title: "Width",
+      type: "number",
+      group: "editorial",
+    }),
+    defineField({
+      name: "length",
+      title: "Length",
+      type: "number",
+      group: "editorial",
     }),
   ],
   orderings: [

@@ -10,7 +10,9 @@ import {
   addToCartMutation,
   createCartMutation,
   editCartItemsMutation,
-  removeFromCartMutation
+  removeFromCartMutation,
+  updateAttributesCartMutation,
+  updateBuyerIdentityCartMutation
 } from './mutations/cart';
 import { getCartQuery } from './queries/cart';
 import {
@@ -24,15 +26,19 @@ import {
   getProductAvailabilityQuery,
   getProductQuery,
   getProductRecommendationsQuery,
-  getProductsQuery
+  getProductsQuery,
+  searchProductsQuery
 } from './queries/product';
 import {
+  AttributePayload,
+  BuyerIdentityPayload,
   Cart,
   Collection,
   Connection,
   Image,
   Menu,
   Page,
+  PageInfo,
   Product,
   ShopifyAddToCartOperation,
   ShopifyCart,
@@ -49,13 +55,17 @@ import {
   ShopifyProductAvailabilityOperation,
   ShopifyProductOperation,
   ShopifyProductRecommendationsOperation,
+  ShopifyProductSearchOperation,
   ShopifyProductsOperation,
   ShopifyRemoveFromCartOperation,
+  ShopifyUpdateCartAttributesOperation,
+  ShopifyUpdateCartBuyerIdentityOperation,
+  ShopifyUpdateCartLinesOperation,
   ShopifyUpdateCartOperation,
   ShopifyWebhookOrder
 } from './types';
 import { waitUntil } from '@vercel/functions';
-import { incrementProductSales } from '@/sanity/lib';
+import { incrementProductSales } from '@/sanity/lib/mutations/product';
 
 const domain = process.env.SHOPIFY_STORE_DOMAIN
   ? ensureStartsWith(process.env.SHOPIFY_STORE_DOMAIN, 'https://')
@@ -129,9 +139,10 @@ const reshapeCart = (cart: ShopifyCart): Cart => {
   if (!cart.cost?.totalTaxAmount) {
     cart.cost.totalTaxAmount = {
       amount: '0.0',
-      currencyCode: 'USD'
+      currencyCode: 'SEK'
     };
   }
+
 
   return {
     ...cart,
@@ -421,7 +432,7 @@ export async function getProductAvailability(handle: string): Promise<Pick<Produ
   return reshapeProductAvailability(res.body.data.product, false);
 }
 
-export async function getProductRecommendations(productId: string): Promise<Product[]> {
+export async function getProductRecommendationIds(productId: string): Promise<string[]> {
   const res = await shopifyFetch<ShopifyProductRecommendationsOperation>({
     query: getProductRecommendationsQuery,
     tags: [TAGS.products],
@@ -430,7 +441,9 @@ export async function getProductRecommendations(productId: string): Promise<Prod
     }
   });
 
-  return reshapeProducts(res.body.data.productRecommendations);
+  const ids = res.body.data.productRecommendations.map((product) => product.id);
+
+  return ids
 }
 
 export async function getProducts({
@@ -456,6 +469,39 @@ export async function getProducts({
   });
 
   return reshapeProducts(removeEdgesAndNodes(res.body.data.products));
+}
+
+export async function searchProducts({
+  query,
+  first,
+  after,
+  before
+}: {
+  query: string
+  first: number
+  after?: string
+  before?: string
+}
+): Promise<{ products: Product[], pageInfo: PageInfo, totalCount: number }> {
+  const res = await shopifyFetch<ShopifyProductSearchOperation>({
+    query: searchProductsQuery,
+    tags: [TAGS.products],
+    variables: {
+      query,
+      first,
+      types: ['PRODUCT'],
+      sortKey: 'RELEVANCE',
+      reverse: false,
+      after,
+      before
+    }
+  });
+
+  return {
+    products: reshapeProducts(removeEdgesAndNodes(res.body.data.search)),
+    pageInfo: res.body.data.search.pageInfo,
+    totalCount: res.body.data.search.totalCount
+  }
 }
 
 // This is called from `app/api/revalidate.ts` so providers can control revalidation logic.
@@ -517,4 +563,46 @@ export async function incrementSales(req: NextRequest): Promise<NextResponse> {
   }
 
   return NextResponse.json({ status: 200, revalidated: true, now: Date.now() });
+}
+
+export async function updateCartAttributes(cartId: string, attributes: AttributePayload): Promise<Cart> {
+  const res = await shopifyFetch<ShopifyUpdateCartAttributesOperation>({
+    query: updateAttributesCartMutation,
+    variables: {
+      cartId,
+      attributes
+    },
+    cache: 'no-store'
+  });
+
+  return reshapeCart(res.body.data.cartAttributesUpdate.cart);
+}
+
+export async function updateCartLines(
+  cartId: string,
+  lines: { id: string; merchandiseId: string; quantity: number, attributes?: { key: string, value: string }[] }[]
+): Promise<Cart> {
+  const res = await shopifyFetch<ShopifyUpdateCartLinesOperation>({
+    query: editCartItemsMutation,
+    variables: {
+      cartId,
+      lines
+    },
+    cache: 'no-store'
+  });
+
+  return reshapeCart(res.body.data.cartLinesUpdate.cart);
+}
+
+export async function updateCartBuyerIdentity(cartId: string, buyerIdentity: BuyerIdentityPayload): Promise<Cart> {
+  const res = await shopifyFetch<ShopifyUpdateCartBuyerIdentityOperation>({
+    query: updateBuyerIdentityCartMutation,
+    variables: {
+      cartId,
+      buyerIdentity
+    },
+    cache: 'no-store'
+  });
+
+  return reshapeCart(res.body.data.cartBuyerIdentityUpdate.cart);
 }

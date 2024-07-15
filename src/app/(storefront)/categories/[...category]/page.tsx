@@ -1,43 +1,67 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
+
+import CategoryTemplate from "@/storefront/components/categories/templates";
+import { SortOptions } from "@/storefront/components/store/components/refinement-list/sort-products";
 import { getCategoriesByPath } from "@/sanity/lib";
-import React from "react";
-import CategoryMain from "@/storefront/components/category";
 
-export async function generateMetadata({
-  params,
-}: {
+export const dynamic = "force-dynamic";
+
+type Props = {
   params: { category: string[] };
-}): Promise<Metadata> {
-  const categories = await getCategoriesByPath({
-    slugs: params.category,
-  });
-
-  if (!categories) return notFound();
-
-  const current = categories[categories.length - 1];
-
-  return {
-    title: current.title,
+  searchParams: {
+    order?: SortOptions;
+    page?: string;
+    vendor?: string;
+    type?: string;
   };
+};
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  try {
+    const categories = await getCategoriesByPath({
+      slugs: params.category,
+    });
+
+    if (!categories) {
+      notFound();
+    }
+
+    const title = categories.map((category) => category.title).join(" | ");
+
+    const description = `${title} kategori.`;
+
+    return {
+      title,
+      description,
+      alternates: {
+        canonical: `${params.category.join("/")}`,
+      },
+    };
+  } catch (error) {
+    notFound();
+  }
 }
 
-export default async function CategoryPage({
-  params,
-  searchParams,
-}: {
-  params: { category: string[] };
-  searchParams?: { [key: string]: string | string[] | undefined };
-}) {
+export default async function CategoryPage({ params, searchParams }: Props) {
+  const { order, page, vendor, type } = searchParams;
+
   const categories = await getCategoriesByPath({
     slugs: params.category,
   });
 
-  if (!categories) return notFound();
-
-  const category = categories[categories.length - 1];
+  if (!categories) {
+    notFound();
+  }
 
   return (
-    <CategoryMain params={params} category={category} categories={categories} />
+    <CategoryTemplate
+      categories={categories}
+      order={order}
+      page={page}
+      categoryHandle={params.category}
+      vendorId={vendor}
+      typeId={type}
+    />
   );
 }

@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react'
 import { useClient } from 'sanity'
 import { useDocumentOperation } from 'sanity'
 import { apiVersion } from '../../lib/api'
-import { categoryPathQuery } from '../../lib/queries'
-import { Category, CategoryPathQueryResult, Product } from '@/sanity.types'
+import { categoriesPathQuery, categoryPathQuery } from '../../lib/queries'
+import { CategoriesPathQueryResult, Category, CategoryPathQueryResult, Product } from '@/sanity.types'
 import { CategoryActionProps, ProductActionProps } from './types'
 import { nanoid } from 'nanoid'
 
@@ -32,28 +32,36 @@ export function ProductPublish(props: ProductActionProps) {
       disabled: !!publish.disabled,
       label: isPublishing ? 'Publishing...' : 'Publish & Update',
       // TODO: Implement onHandle
-      // onHandle: async () => {
-      //    // This will update the button text
-      //    setIsPublishing(true)
+      onHandle: async () => {
+         // This will update the button text
+         setIsPublishing(true)
 
-      //    if (draft && draft.category?._ref) {
-      //       const parentPath: CategoryPathQueryResult = await client.fetch(categoryPathQuery, { id: draft.category?._ref ?? "" })
-      //       const parentPathArray = parentPath?.path?.map(path => ({ _ref: path._ref, _type: path._type, _key: nanoid() })) ?? []
+         console.log(draft, draft.categories, draft.categories?.length)
 
-      //       // Set the path
-      //       patch.execute([{ set: { categoryPath: parentPathArray } }])
-      //    }
 
-      //    if (draft && !draft.category?._ref) {
-      //       // Set the path
-      //       patch.execute([{ set: { categoryPath: [] } }])
-      //    }
+         if (draft && draft.categories && draft.categories.length > 0) {
+            const parentPaths: CategoriesPathQueryResult = await client.fetch(categoriesPathQuery, { id: draft.categories.map(c => c._ref) ?? "" })
+            const allPathIds = parentPaths.map(path => path.path).flat().map(path => path?._ref)
 
-      //    // Perform the publish
-      //    publish.execute()
+            // Filter out the unique paths
+            const uniquePathIds = allPathIds.filter((id, index) => allPathIds.indexOf(id) === index)
 
-      //    // Signal that the action is completed
-      //    props.onComplete()
-      // },
+            const parentPathArray = uniquePathIds.map(id => ({ _ref: id, _type: "reference", _key: nanoid() })) ?? []
+
+            // Set the path
+            patch.execute([{ set: { categoryPath: parentPathArray } }])
+         }
+
+         if (draft && (!draft.categories || draft.categories.length === 0)) {
+            // Set the path
+            patch.execute([{ set: { categoryPath: [] } }])
+         }
+
+         // Perform the publish
+         publish.execute()
+
+         // Signal that the action is completed
+         props.onComplete()
+      },
    }
 }

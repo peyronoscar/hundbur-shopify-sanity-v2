@@ -1,9 +1,11 @@
-import { CategoriesByPathQueryResult, CategoriesQueryResult, Product, ProductByHandleQueryResult } from "@/sanity.types";
+import { CategoriesByPathQueryResult, CategoriesQueryResult, CategoryTreeQueryResult, Product, ProductByHandleQueryResult, ProductsByIdsQueryResult, ProductsQueryTemplateResult } from "@/sanity.types";
 import { sanityFetch } from "./fetch";
-import { categoriesByPathQuery, categoriesQuery, categoryProductsQuery, productByHandleQuery } from "./queries";
+import { categoriesByPathQuery, categoriesQuery, categoryProductsQuery, categoryTreeQuery, productByHandleQuery, productTypesQuery, productVendorsQuery, productsByIdsQuery, productsCountQuery, productsQuery } from "./queries";
 import { ShopifyWebhookOrder } from "@/storefront/lib/shopify/types";
 import { developerClient } from "./client";
 import { TAGS } from "@/storefront/lib/sanity/constants";
+import { PaginatedProductsParams } from "@/storefront/components/store/templates/paginated-products";
+import { getProductRecommendationIds } from "@/storefront/lib/shopify";
 
 export async function getCategories() {
    return await sanityFetch<CategoriesQueryResult>({
@@ -95,5 +97,62 @@ export async function getProduct(handle: string) {
    return await sanityFetch<ProductByHandleQueryResult>({
       query: productByHandleQuery,
       params: { slug: handle },
+   });
+}
+
+export async function getProductTypes() {
+   return await sanityFetch<string[]>({
+      query: productTypesQuery,
+   });
+}
+
+export async function getProductVendors() {
+   return await sanityFetch<string[]>({
+      query: productVendorsQuery,
+   });
+}
+
+export async function getCategoryTree() {
+   return await sanityFetch<CategoryTreeQueryResult>({
+      query: categoryTreeQuery,
+   });
+}
+
+export async function getPaginatedProducts({ queryParams, page = 0 }: {
+   queryParams: PaginatedProductsParams,
+   page?: number
+}) {
+   const productCount = await getProductCount({ queryParams });
+
+   const products = await sanityFetch<ProductsQueryTemplateResult>({
+      query: productsQuery({ queryParams, productCount, page })
+   });
+
+   const totalPages = Math.ceil(productCount / queryParams.limit);
+
+   return {
+      products,
+      count: productCount,
+      totalPages
+   }
+}
+
+export async function getProductCount({ queryParams }: {
+   queryParams: PaginatedProductsParams;
+}) {
+   return await sanityFetch<number>({
+      query: productsCountQuery({ queryParams })
+   });
+}
+
+export async function getProductRecommendations(id: string) {
+   const ids = await getProductRecommendationIds(id);
+
+   const sanityIds = ids.map((id) => `shopifyProduct-${id.split("/").pop()}`);
+   return sanityFetch<ProductsByIdsQueryResult>({
+      query: productsByIdsQuery,
+      params: {
+         ids: sanityIds
+      }
    });
 }

@@ -1,31 +1,43 @@
 import { developerClient } from '@/sanity/lib/client'
 import { sleep } from '@/storefront/lib/utils'
 import fs from 'fs'
-import { nanoid } from 'nanoid'
-
-type JSONCategory = {
-   id: string
-   title: string
-   handle: string
-}
 
 type JSONProduct = {
-   id: string
-   title: string
-   handle: string
-   category_leaves: JSONCategory[],
-   category_branches: JSONCategory[]
+   handle: string,
+   weight: number | null;
+   height: number | null;
+   width: number | null;
+   length: number | null;
 }
 
 async function insertProducts(products: JSONProduct[]) {
    let i = 0;
 
    for (const p of products) {
-      if (i < 120) {
-         i++
-         continue
-      }
       console.log(`Working on product ${p.handle} (${i + 1}/${products.length})`)
+
+      const data: {
+         height?: number;
+         width?: number;
+         length?: number;
+         weight?: number;
+      } = {}
+
+      if (p.height) {
+         data['height'] = p.height
+      }
+
+      if (p.width) {
+         data['width'] = p.width
+      }
+
+      if (p.length) {
+         data['length'] = p.length
+      }
+
+      if (p.weight) {
+         data['weight'] = p.weight
+      }
 
       const product = await developerClient.fetch(`*[_type == 'product' && store.slug.current == '${p.handle}'][0]{ _id }`)
 
@@ -36,15 +48,10 @@ async function insertProducts(products: JSONProduct[]) {
          continue
       }
 
-      const path = p.category_branches.map(c => ({ _type: 'reference', _ref: c.id, _key: nanoid() }))
-      const categories = p.category_leaves.map(c => ({ _type: 'reference', _ref: c.id, _key: nanoid() }))
-
-      console.log(`Inserting ${categories.length} categories and ${path.length} paths`)
-
-      await developerClient.patch(product_id).set({
-         categories,
-         categoryPath: path
-      }).commit()
+      if (Object.keys(data).length > 0) {
+         console.log(`Inserting ${Object.keys(data)}`)
+         await developerClient.patch(product_id).set(data).commit()
+      }
 
       await sleep(500)
 

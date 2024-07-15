@@ -12,11 +12,20 @@ export type Cart = Omit<ShopifyCart, 'lines'> & {
   lines: CartItem[];
 };
 
+export type PageInfo = {
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+  endCursor: string;
+  startCursor: string;
+};
+
 export type CartItem = {
   id: string;
   quantity: number;
   cost: {
     totalAmount: Money;
+    compareAtAmountPerQuantity?: Money;
+    amountPerQuantity: Money;
   };
   merchandise: {
     id: string;
@@ -25,6 +34,16 @@ export type CartItem = {
       name: string;
       value: string;
     }[];
+    availableForSale: boolean;
+    sku?: string;
+    unitPrice?: Money;
+    unitPriceMeasurement?: {
+      measuredType: string;
+      quantityUnit: string;
+      quantityValue: number;
+      referenceUnit: string;
+      referenceValue: number;
+    };
     product: Product;
   };
 };
@@ -113,9 +132,43 @@ export type ProductVariant = {
   };
 };
 
+export type BuyerIdentity = {
+  countryCode?: string,
+  deliveryAddressPreferences?: [
+    {
+      address1?: string,
+      address2?: string,
+      city?: string,
+      company?: string,
+      country?: string,
+      firstName?: string,
+      lastName?: string,
+      phone?: string,
+      province?: string,
+      zip?: string
+    }
+  ],
+  email?: string,
+  phone?: string,
+  walletPreferences?: [
+    string
+  ]
+}
+
 export type SEO = {
   title: string;
   description: string;
+};
+
+export type ShopifyGid = Pick<URL, 'search' | 'searchParams' | 'hash'> & {
+  id: string;
+  resource: string | null;
+  resourceId: string | null;
+};
+
+export type ShopifyCartAttribute = {
+  key: string;
+  value: string;
 };
 
 export type ShopifyCart = {
@@ -128,6 +181,8 @@ export type ShopifyCart = {
   };
   lines: Connection<CartItem>;
   totalQuantity: number;
+  buyerIdentity: BuyerIdentity;
+  attributes: ShopifyCartAttribute[];
 };
 
 export type ShopifyCollection = {
@@ -147,12 +202,14 @@ export type ShopifyProduct = {
   description: string;
   descriptionHtml: string;
   options: ProductOption[];
+  vendor: string;
   priceRange: {
     maxVariantPrice: Money;
     minVariantPrice: Money;
   };
+  productType?: string;
   variants: Connection<ProductVariant>;
-  featuredImage: Image;
+  featuredImage?: Image;
   images: Connection<Image>;
   seo: SEO;
   tags: string[];
@@ -184,6 +241,70 @@ export type ShopifyAddToCartOperation = {
       merchandiseId: string;
       quantity: number;
     }[];
+  };
+};
+
+export type AttributePayload = ShopifyCartAttribute[]
+
+export type ShopifyUpdateCartAttributesOperation = {
+  data: {
+    cartAttributesUpdate: {
+      cart: ShopifyCart;
+    };
+  };
+  variables: {
+    cartId: string;
+    attributes: AttributePayload;
+  };
+};
+
+export type ShopifyUpdateCartLinesOperation = {
+  data: {
+    cartLinesUpdate: {
+      cart: ShopifyCart;
+    };
+  };
+  variables: {
+    cartId: string;
+    lines: {
+      id: string;
+      merchandiseId: string;
+      quantity: number;
+    }[];
+  };
+};
+
+export type BuyerIdentityPayload = {
+  countryCode?: string,
+  customerAccessToken?: string,
+  deliveryAddressPreferences?: [
+    {
+      customerAddressId?: string,
+      deliveryAddress?: {
+        address1?: string,
+        address2?: string,
+        city?: string,
+        company?: string,
+        country?: string,
+        firstName?: string,
+        lastName?: string,
+        phone?: string,
+        province?: string,
+        zip?: string
+      }
+    }
+  ],
+}
+
+export type ShopifyUpdateCartBuyerIdentityOperation = {
+  data: {
+    cartBuyerIdentityUpdate: {
+      cart: ShopifyCart;
+    };
+  };
+  variables: {
+    cartId: string;
+    buyerIdentity: BuyerIdentityPayload;
   };
 };
 
@@ -284,7 +405,7 @@ export type ShopifyProductAvailabilityOperation = {
 
 export type ShopifyProductRecommendationsOperation = {
   data: {
-    productRecommendations: ShopifyProduct[];
+    productRecommendations: { id: string }[];
   };
   variables: {
     productId: string;
@@ -300,6 +421,24 @@ export type ShopifyProductsOperation = {
     reverse?: boolean;
     sortKey?: string;
     first?: number;
+  };
+};
+
+export type ShopifyProductSearchOperation = {
+  data: {
+    search: Connection<ShopifyProduct> & {
+      pageInfo: PageInfo
+      totalCount: number
+    };
+  };
+  variables: {
+    query: string;
+    first: number;
+    reverse?: boolean;
+    sortKey: string;
+    types?: string[];
+    after?: string;
+    before?: string;
   };
 };
 
