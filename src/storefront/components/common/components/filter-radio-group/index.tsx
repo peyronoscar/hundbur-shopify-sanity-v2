@@ -22,17 +22,18 @@ const FilterRadioItem = ({
   handleChange,
   item,
 }: FilterRadioItemProps) => {
+  const isActive = decodeURIComponent(item.value) === decodeURIComponent(value);
   return (
     <div className="ml-3">
       <div
         key={item.value}
         className={clx("flex gap-x-2 items-center", {
-          "ml-[-1.75rem]": item.value === value,
+          "ml-[-1.75rem]": isActive,
         })}
       >
-        {item.value === value && <EllipseMiniSolid />}
+        {isActive && <EllipseMiniSolid />}
         <RadioGroup.Item
-          checked={item.value === value}
+          checked={isActive}
           onClick={(e) =>
             handleChange(
               e as unknown as ChangeEvent<HTMLButtonElement>,
@@ -48,7 +49,7 @@ const FilterRadioItem = ({
           className={clx(
             "!txt-compact-small !transform-none text-ui-fg-subtle hover:cursor-pointer",
             {
-              "text-ui-fg-base": item.value === value,
+              "text-ui-fg-base": isActive,
             }
           )}
         >
@@ -88,7 +89,7 @@ const FilterRadioGroup = ({
 
   const handleChange = (e: ChangeEvent<HTMLButtonElement>) => {
     const newValue = e.target.value as string;
-    setQueryParams(param, newValue, ["page"]);
+    setQueryParams(param, encodeURIComponent(newValue), ["page"]);
   };
 
   return (

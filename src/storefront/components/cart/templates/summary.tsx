@@ -6,6 +6,7 @@ import CartTotals from "@/storefront/components/common/components/cart-totals";
 import Divider from "@/storefront/components/common/components/divider";
 import LocalizedClientLink from "@/storefront/components/common/components/localized-client-link";
 import { Cart } from "@/storefront/lib/shopify/types";
+import { sendGTMEvent } from "@next/third-parties/google";
 
 type SummaryProps = {
   cart: Cart;
@@ -19,7 +20,15 @@ const Summary = ({ cart }: SummaryProps) => {
       </Heading>
       <Divider />
       <CartTotals data={cart} />
-      <Button className="w-full h-10" asChild>
+      <Button
+        className="w-full h-10"
+        onClick={() =>
+          sendGTMEvent({
+            event: "begin_checkout",
+          })
+        }
+        asChild
+      >
         <a href={cart.checkoutUrl}>Gå till kassan</a>
       </Button>
     </div>

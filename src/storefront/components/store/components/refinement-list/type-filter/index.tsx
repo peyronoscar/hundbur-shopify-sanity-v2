@@ -9,7 +9,7 @@ const TypeFilter = async ({ typeId }: TypeFilterProps) => {
   const product_types = await getProductTypes();
 
   const items = product_types.map((type) => ({
-    value: encodeURIComponent(type),
+    value: type,
     label: type,
   }));
 

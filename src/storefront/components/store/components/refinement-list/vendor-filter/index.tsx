@@ -9,7 +9,7 @@ const VendorFilter = async ({ vendorId }: VendorFilterProps) => {
   const product_vendors = await getProductVendors();
 
   const items = product_vendors.map((vendor) => ({
-    value: encodeURIComponent(vendor),
+    value: vendor,
     label: vendor,
   }));
 
