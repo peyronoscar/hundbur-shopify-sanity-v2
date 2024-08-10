@@ -57,9 +57,6 @@ export default function Nav() {
           </div>
         </nav>
       </header>
-      <div className="cotainer text-sm py-2 text-center bg-red-200 text-red-900">
-        Mellan 11/7-2/8 har vi längre leveranstid än vanligt
-      </div>
     </div>
   );
 }
