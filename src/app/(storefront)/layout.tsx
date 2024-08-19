@@ -1,4 +1,5 @@
 import "../globals.css";
+import "@/storefront/styles/marquee.css";
 
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata } from "next";
