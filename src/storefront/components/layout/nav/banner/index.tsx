@@ -13,7 +13,7 @@ export function NavBanner() {
       <Marquee className="select-none" speed={0.4} direction="left">
         <div className="flex items-center gap-16 pl-16 md:gap-20 md:pl-20 text-sm md:text-xs font-medium">
           <div>
-            Säkra betalning Snabba <span className="mx-2">&#x2022;</span>{" "}
+            Säkra betalning <span className="mx-2">&#x2022;</span> Snabba
             leveranser
           </div>
           <div className="flex gap-2">
